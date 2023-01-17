@@ -30,6 +30,9 @@ if [ $error -ne 0 ]; then
         exit
 fi
 
+filedate=$(date +"%Y%m%d%H%M%S")
+filetoday="/data/config-router-$filedate.xml"
+filelatest="/data/latest/config-router-latest.xml"
 # These commands taken from:
 # https://doc.pfsense.org/index.php/Remote_Config_Backup
 
@@ -39,4 +42,7 @@ wget -qO- --keep-session-cookies --save-cookies cookies.txt  --no-check-certific
 wget -qO- --keep-session-cookies --load-cookies cookies.txt --save-cookies cookies.txt --no-check-certificate  --post-data "login=Login&usernamefld=$PFSENSE_USER&passwordfld=$PFSENSE_PASS&__csrf_magic=$(cat csrf.txt)" $url  | grep "name='__csrf_magic'" \
   | sed 's/.*value="\(.*\)".*/\1/' > csrf2.txt
 
-wget -q --keep-session-cookies --load-cookies cookies.txt --no-check-certificate  --post-data "download=download&donotbackuprrd=yes&__csrf_magic=$(head -n 1 csrf2.txt)" $url -O /data/config-router-`date +%Y%m%d%H%M%S`.xml
+wget -q --keep-session-cookies --load-cookies cookies.txt --no-check-certificate  --post-data "download=download&donotbackuprrd=yes&__csrf_magic=$(head -n 1 csrf2.txt)" $url -O $filetoday
+
+mkdir -p /data/latest
+cp $filetoday $filelatest
